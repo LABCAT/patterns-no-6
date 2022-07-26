@@ -65,6 +65,10 @@ const P5SketchWithAudio = () => {
 
         p.gridCells = [];
 
+        p.expandingCellIndex = 0;
+
+        p.expandingCell = null;
+
         p.setup = () => {
             p.canvas = p.createCanvas(p.canvasWidth, p.canvasHeight);
             p.colorMode(p.HSB);
@@ -113,24 +117,51 @@ const P5SketchWithAudio = () => {
                     cell.draw(); 
                     cell.update(); 
                 }
+
+                if(p.expandingCell) {
+                    p.expandingCell.draw();
+                    p.expandingCell.update();
+                }
             }
         }
 
-        p.expandingCell = -1;
-
         p.executeCueSet1 = (note) => {
             const { currentCue, duration } = note,
-                delayAmount = parseInt(duration * 1000) / p.gridCoords.length,
-                cells = p.shuffle(p.gridCoords);
+                delayAmount = parseInt(duration * 1000) / p.gridCoords.length;
+            
+            if(currentCue % 4 === 1) {
+                p.expandingCellIndex = Math.floor(p.random(0, 9));
+                p.expandingCell = new PatternCell(
+                    p,
+                    p.gridCoords[p.expandingCellIndex].x,
+                    p.gridCoords[p.expandingCellIndex].y,
+                    p.width / 3,
+                    p.height / 3,
+                    TetradicColourCalculator(
+                        p,
+                        p.random(0, 360),
+                        p.random(50, 100),
+                        p.random(50, 100),
+                    ),
+                    p.randPattern(p.width / 3, 8)
+                );
+            } else if(currentCue % 2 === 0) {
+                p.expandingCell.patternActive = true;
+            } else if(currentCue % 4 === 3) {
+                p.expandingCell.patternActive = false;
+                p.expandingCell.canExpand = true;
+            }
 
-            p.expandingCell = p.expandingCell > - 1 ? Math.floor(p.random(0, 9)) : p.expandingCell;
+            const cells = p.shuffle([
+                ...p.gridCoords.slice(0, p.expandingCellIndex), 
+                ...p.gridCoords.slice(p.expandingCellIndex + 1)
+            ]);
 
             for (let i = 0; i < cells.length; i++) {
-                const { x, y } = cells[i], 
-                    canExpand = p.expandingCell === i;
+                const { x, y } = cells[i];
                 setTimeout(
                     function () {
-                        if(currentCue % 4 === 2 || currentCue % 4 === 0) {
+                        if(currentCue % 2 === 0) {
                             p.gridCells[i].patternActive = true;
                         }
                         else {
@@ -146,21 +177,17 @@ const P5SketchWithAudio = () => {
                                     p.random(50, 100),
                                     p.random(50, 100),
                                 ),
-                                p.randPattern(p.width / 3),
-                                canExpand
+                                p.randPattern(p.width / 3)
                             );
                         }
                     },
                     (delayAmount * i)
                 );
             }
-            console.log(duration);
         }
 
-        p.randPattern = (t) => {
+        p.randPattern = (t, excludeIndex = -1) => {
             const ptArr = [
-                // PTN.noise(0.5),
-                // PTN.noiseGrad(0.4),
                 PTN.stripe(t / p.int(p.random(6, 12))),
                 PTN.stripeCircle(t / p.int(p.random(6, 12))),
                 PTN.stripePolygon(p.int(p.random(3, 7)),  p.int(p.random(6, 12))),
@@ -171,6 +198,15 @@ const P5SketchWithAudio = () => {
                 PTN.cross(t / p.int(p.random(10, 20)), t / p.int(p.random(20, 40))),
                 PTN.triangle(t / p.int(p.random(5, 20)), t / p.int(p.random(5, 20)))
             ]
+
+            if(excludeIndex > 0) {
+                return p.random(
+                    [
+                        ...ptArr.slice(0, excludeIndex), 
+                        ...ptArr.slice(excludeIndex + 1)
+                    ]
+                );
+            }
             return p.random(ptArr);
         }
 
@@ -183,16 +219,18 @@ const P5SketchWithAudio = () => {
                 } else {
                     if (parseInt(p.song.currentTime()) >= parseInt(p.song.buffer.duration)) {
                         p.reset();
-                        window.dataLayer.push(
-                            { 
-                                'event': 'play-animation',
-                                'animation': {
-                                    'title': document.title,
-                                    'location': window.location.href,
-                                    'action': 'replaying'
+                        if (typeof window.dataLayer !== typeof undefined && !p.hasStarted){
+                            window.dataLayer.push(
+                                { 
+                                    'event': 'play-animation',
+                                    'animation': {
+                                        'title': document.title,
+                                        'location': window.location.href,
+                                        'action': 'replaying'
+                                    }
                                 }
+                            );
                             }
-                        );
                     }
                     document.getElementById("play-icon").classList.add("fade-out");
                     p.canvas.addClass("fade-in");

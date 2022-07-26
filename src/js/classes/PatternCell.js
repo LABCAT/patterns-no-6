@@ -16,8 +16,8 @@ export default class PatternCell {
 
     update() {
         if(this.canExpand) {
-            this.width++;
-            this.height++;
+            this.width = this.width + this.p.width / 192;
+            this.height = this.height + this.p.height / 192;
         }
     }
 
