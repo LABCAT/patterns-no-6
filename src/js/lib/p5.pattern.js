@@ -763,9 +763,11 @@ const PTN =
             _rt.fill(c[0]);
             _rt.rect(0, 0, _w, _h);
 
-            _rt.fill(c[1]);
+            const tileColours = c.slice(1);
+            let count = 0;
             for(let y = -_waveH; y <= _h + _waveH; y+= _space)
             {
+                _rt.fill(tileColours[count % tileColours.length])
                 _rt.beginShape();
                 
                 for(let x = 0; x < _w; x += vertSpan)
@@ -783,6 +785,7 @@ const PTN =
                 _rt.vertex(0, y + _weight + Math.sin(0) * _waveH);
                 
                 _rt.endShape(_rt.CLOSE);
+                count++;
             }
         }
         return func;
@@ -808,8 +811,9 @@ const PTN =
             _rt.fill(c[0]);
             _rt.rect(0, 0, _w, _h);
 
-            let yi = 0;
-            _rt.fill(c[1]);
+            const tileColours = c.slice(1);
+            let yi = 0,
+                count = 0;
             for(let y = 0; y <= _h + _spaceY /2; y += _spaceY)
             {
                 let xi = 0;
@@ -818,9 +822,11 @@ const PTN =
                 {
                     _rt.push();
                     _rt.translate(x, y);
+                    _rt.fill(tileColours[count % tileColours.length])
                     _tileFunc(_rt, xi, yi);
                     _rt.pop();
                     xi++;
+                    count++;
                 }
                 yi++;
             }
