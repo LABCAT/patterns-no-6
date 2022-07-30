@@ -1,7 +1,7 @@
 {
-  "name": "react-p5js-tonejs-starter-kit",
+  "name": "patterns-no-6",
   "version": "1.0.0",
-  "homepage": ".",
+  "homepage": "https://patterns-no-6.labcat.nz",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",
