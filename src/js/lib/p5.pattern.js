@@ -901,9 +901,18 @@ const PTN =
             _rt.fill(c[0]);
             _rt.rect(0, 0, _w, _h);
             
-            _rt.fill(c[1 % c.length]);
-            for(let y = 0; y < _h; y+= _space)_rt.rect(0, y + _space / 2 - _weight /2, _w, _weight); 
-            for(let x = 0; x < _w; x+= _space)_rt.rect(x + _space / 2 - _weight / 2, 0, _weight, _h); 
+            const tileColours = c.slice(1);
+            let count = 0;
+            for(let y = 0; y < _h; y+= _space) {
+                _rt.fill(tileColours[count % tileColours.length])
+                _rt.rect(0, y + _space / 2 - _weight /2, _w, _weight);
+                count++;
+            } 
+            for(let x = 0; x < _w; x+= _space) {
+                _rt.fill(tileColours[count % tileColours.length])
+                _rt.rect(x + _space / 2 - _weight / 2, 0, _weight, _h); 
+                count++;
+            }
         }
         return func;
     },

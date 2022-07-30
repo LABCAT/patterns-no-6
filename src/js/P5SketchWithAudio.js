@@ -90,25 +90,6 @@ const P5SketchWithAudio = () => {
         
 
         p.draw = () => {
-            // const d = p.width * 0.08;
-            // p.pattern(p.randPattern(p.width / 3));
-            // p.rectPattern(0, 0, p.width / 3, p.height / 3);
-
-            // for (let i = 0; i < p.gridCoords.length; i++) {
-            //     const cell = p.gridCoords[i],
-            //         { x, y } = cell, 
-            //         pallette = TetradicColourCalculator(
-            //             p,
-            //             p.random(0, 360),
-            //             p.random(50, 100),
-            //             p.random(50, 100),
-            //         );
-                
-            //     p.patternColors(p.shuffle(pallette));
-            //     p.pattern(p.randPattern(p.width / 3));
-            //     p.patternAngle(p.int(p.random(4)) * p.PI / 4);
-            //     p.rectPattern(x, y, p.width / 3, p.height / 3);
-            // }
             if(p.audioLoaded && p.song.isPlaying()){
                 p.background(0, 0, 100);
 
@@ -143,7 +124,7 @@ const P5SketchWithAudio = () => {
                         p.random(50, 100),
                         p.random(50, 100),
                     ),
-                    p.randPattern(p.width / 3, 8)
+                    p.randPattern(p.width / 3, [0,3,4])
                 );
             } else if(currentCue % 2 === 0) {
                 p.expandingCell.patternActive = true;
@@ -186,8 +167,8 @@ const P5SketchWithAudio = () => {
             }
         }
 
-        p.randPattern = (t, excludeIndex = -1) => {
-            const ptArr = [
+        p.randPattern = (t, selectedIndexes = []) => {
+            const allPatterns = [
                 PTN.stripe(t / p.int(p.random(6, 12))),
                 PTN.stripeCircle(t / p.int(p.random(6, 12))),
                 PTN.stripePolygon(p.int(p.random(3, 7)),  p.int(p.random(6, 12))),
@@ -197,17 +178,22 @@ const P5SketchWithAudio = () => {
                 PTN.checked(t / p.int(p.random(5, 20)), t / p.int(p.random(5, 20))),
                 PTN.cross(t / p.int(p.random(10, 20)), t / p.int(p.random(20, 40))),
                 PTN.triangle(t / p.int(p.random(5, 20)), t / p.int(p.random(5, 20)))
-            ]
+            ];
+                
+            let patterns = [];
+                
 
-            if(excludeIndex > 0) {
-                return p.random(
-                    [
-                        ...ptArr.slice(0, excludeIndex), 
-                        ...ptArr.slice(excludeIndex + 1)
-                    ]
-                );
+            if(selectedIndexes.length) {
+                selectedIndexes.forEach(index => {
+                    patterns.push(allPatterns[index]);
+                });
+            } else {
+                patterns = allPatterns;
             }
-            return p.random(ptArr);
+
+            const randIndex = Math.floor(p.random(0, patterns.length));
+
+            return patterns[randIndex];
         }
 
         p.hasStarted = false;
